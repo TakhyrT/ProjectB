@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -98,17 +99,18 @@ func ParseNumber(numberString string) (int, error) {
 }
 
 func StringToArabic(arabic string) (int, error) {
-	result := 0
-	for _, digit := range arabic {
-		if digit < '0' || digit > '9' {
-			return 0, fmt.Errorf("ошибка")
-		}
-		result = result*10 + int(digit-'0')
+	// Прямое использование функции strconv.Atoi для преобразования строки в число.
+	result, err := strconv.Atoi(arabic)
+
+	// Проверка на наличие ошибки и на диапазон от 1 до 10 после успешного преобразования.
+	if err != nil {
+		return 0, err // Возвращение ошибки, если преобразование не удалось.
 	}
 	if result < 1 || result > 10 {
-		return 0, fmt.Errorf("ошибка", result)
+		return 0, fmt.Errorf("число %d вне допустимого диапазона 1-10", result)
 	}
-	return result, nil
+
+	return result, nil // Возвращение полученного числа и nil в случае отсутствия ошибки.
 }
 func main() {
 	reader := bufio.NewReader(os.Stdin)
