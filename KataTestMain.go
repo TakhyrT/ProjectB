@@ -28,24 +28,38 @@ func RomanToArabic(roman string) (int, error) {
 	return 0, fmt.Errorf("ошибка")
 }
 
-func ArabicToRoman(arabic int) (string, error) {
-	if arabic < 1 || arabic > 10 {
-		return "", fmt.Errorf("ошибка", arabic)
-	}
-	arabicToRoman := map[int]string{
-		1:  "I",
-		2:  "II",
-		3:  "III",
-		4:  "IV",
-		5:  "V",
-		6:  "VI",
-		7:  "VII",
-		8:  "VIII",
-		9:  "IX",
-		10: "X",
-	}
+    func ArabicToRoman(arabic int) (string, error) {
+    arabicToRoman := map[int]string{
+        1:  "I",
+        2:  "II",
+        3:  "III",
+        4:  "IV",
+        5:  "V",
+        6:  "VI",
+        7:  "VII",
+        8:  "VIII",
+        9:  "IX",
+        10: "X",
+          11: "XI",
+        12: "XII",
+        13: "XIII",
+        14: "XIV",
+        15: "XV",
+        16: "XVI",
+        17: "XVII",
+        18: "XVIII",
+        19: "XIX",
+        20: "XX",
+          30: "XXX",
+          40: "XL",
+          50: "L",
+          100: "C",
+    }
 
-	return arabicToRoman[arabic], nil
+    if roman, ok := arabicToRoman[arabic]; ok {
+        return roman, nil
+    }
+    panic(fmt.Sprintf("ошибка поведения для числа %d", arabic))
 }
 func Calculate(num1, num2 int, operator string) (int, error) {
 	switch operator {
@@ -66,25 +80,39 @@ func Calculate(num1, num2 int, operator string) (int, error) {
 }
 
 func ParseLine(input string) (int, int, rune, error) {
-	var num1, num2 int
-	var operator rune
-	operators := "+-*/"
-	for i, r := range input {
-		if strings.ContainsRune(operators, r) {
-			operator = r
-			var err error
-			num1, err = ParseNumber(input[:i])
-			if err != nil {
-				return 0, 0, 0, err
-			}
-			num2, err = ParseNumber(input[i+1:])
-			if err != nil {
-				return 0, 0, 0, err
-			}
-			break
-		}
-	}
+    var num1, num2 int
+    var operator rune
+    operators := "+-*/"
+    isRoman := strings.ContainsAny(input, "IVXLCDM")
 
+    for i, r := range input {
+        if strings.ContainsRune(operators, r) {
+            operator = r
+
+            if isRoman != strings.ContainsAny(input[:i], "IVXLCDM") {
+                panic("Нельзя использовать арабские и римские числа вместе")
+            }
+
+            var err error
+            num1, err = ParseNumber(input[:i])
+            if err != nil {
+                return 0, 0, 0, err
+            }
+
+            num2, err = ParseNumber(input[i+1:])
+            if err != nil {
+                return 0, 0, 0, err
+            }
+            break
+        }
+    }
+
+    if operator == 0 {
+        panic("не найден оператор")
+    }
+
+    return num1, num2, operator, nil
+    
 	if operator == 0 {
 		return 0, 0, 0, fmt.Errorf("не найден оператор")
 	}
@@ -99,18 +127,15 @@ func ParseNumber(numberString string) (int, error) {
 }
 
 func StringToArabic(arabic string) (int, error) {
-	// Прямое использование функции strconv.Atoi для преобразования строки в число.
 	result, err := strconv.Atoi(arabic)
-
-	// Проверка на наличие ошибки и на диапазон от 1 до 10 после успешного преобразования.
 	if err != nil {
-		return 0, err // Возвращение ошибки, если преобразование не удалось.
+		return 0, err
 	}
 	if result < 1 || result > 10 {
 		return 0, fmt.Errorf("число %d вне допустимого диапазона 1-10", result)
 	}
 
-	return result, nil // Возвращение полученного числа и nil в случае отсутствия ошибки.
+	return result, nil 
 }
 func main() {
 	reader := bufio.NewReader(os.Stdin)
@@ -131,7 +156,7 @@ func main() {
 	if isRoman {
 		romanResult, err := ArabicToRoman(result)
 		if err != nil {
-			fmt.Println("Ошибка:", err)
+    panic(err)
 			return
 		}
 		fmt.Println("Результат: ", romanResult)
